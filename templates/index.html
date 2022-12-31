@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>databeat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .hide{
+            display: none !important;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: steelblue;
+        }
+        .card form {
+            margin-top: 100px;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;            
+            align-items: center;
+            background-color: grey;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .card form h3 {
+            color: pink;
+            text-shadow: 1px 1px 5px black;
+        }
+        .card form input {
+            border: none;
+            padding: 4px 8px;
+            outline: none;
+            border-radius: 3px;
+            background-color: burlywood;
+            box-shadow: 0px 0px 10px 1px white inset;
+        }
+        
+        #errors p {
+            font-size: 15px;
+            font-style: italic;
+            color: red;
+        }
+        #scs-msg{
+            font-size: 15px;
+            font-style: italic;
+            color: white;
+        }
+        #homepage{
+            min-height: 100vh;
+            min-width: 100vw;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;            
+        }        
+        #homepage p{
+            padding: 10px;
+            text-align: center;
+            background-color:azure;
+            color: green;
+            font-weight: 600;
+            text-transform: uppercase;
+            border: 2px springgreen solid;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            text-shadow: 3px 3px 10px black;
+        }
+        #logout {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+        #products-container {
+            border: 1px red solid;
+            flex-grow: 1;
+        }
+        #logout {
+            background-color: red;
+            color: white;
+            outline: none;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            box-shadow: 4px 4px 10px 1px black;
+        }
+        #homepage .card form {
+            margin-top: 0px;
+        }
+        input[type=submit] {
+            cursor: pointer;
+        }
+        #products-container {
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;            
+            padding: 10px;
+        }
+        #products-container div{
+            display: flex;
+            flex-direction: column;                        
+            padding: 10px 20px;
+            background-color: palevioletred;            
+            align-self: flex-start;
+        }
+        #products-container button {
+            border: none;
+            outline: none;
+            padding: 4px 8px;
+            background-color: rgb(155, 60, 16);
+            border-radius: 2px;
+            margin: 3px;
+            color: white;
+        }
+        #products-container div>p{
+            border: none;
+            background-color: pink;
+            color: black;
+            padding: 2px 4px;               
+            text-shadow: none; 
+            font-weight: normal;
+            font-size: 14px;
+            text-transform: capitalize;
+        }
+        #product-error p {
+            font-size: 15px;
+            font-style: italic;
+            color: white;
+            padding: none;
+            border: none;
+            background-color: inherit;
+            font-style: italic;
+            font-weight: normal;
+            text-shadow: none;
+            font-size: 14px;
+            text-transform: lowercase;
+        }
+    </style>
+</head>
+<body>
+    <div id="register" class="card">
+        <form>
+            <h3>Register</h3>
+            <input id="register-name" required type="text" name="name" placeholder="enter name">
+            <input id="register-email" required type="email" name="email" placeholder="enter email">
+            <input id="register-password" required type="password" name="password" placeholder="enter password">
+            <input id="register-confirm-password" required type="password" name="confirm_password" placeholder="confirm password">
+            <div>
+                <input type="submit" value="submit">
+                <input id="goto-login" type="button" value="login">
+            </div>
+        </form>
+    </div>
+    <div id="login" class="card hide">
+        <form>
+            <h3>Login</h3>
+            <input id="login-name" required type="text" name="name" placeholder="enter name">
+            <input id="login-password" required type="password" name="password" placeholder="enter password">
+            <div>
+                <input type="submit" value="submit">
+                <input id="goto-signup" type="button" value="signup">
+            </div>            
+        </form>        
+    </div>
+    <div id="homepage" class="hide">
+        <div><p id="products-heading">products of narendra </p><button id="logout">logout</button></div>
+        <div class="card">
+            <form id="add-product">
+                <input type="text" name="name" id="name" placeholder="enter product name: ">
+                <input type="text" name="quantity" id="quantity" placeholder="enter quantity: ">
+                <input type="text" name="price" id="price" placeholder="enter price: ">
+                <input type="submit" value="Add Product">
+                <div id="product-error"></div>
+            </form>
+        </div>
+        <div id="products-container"></div>
+    </div>
+    <div id="errors"></div>
+    <div id="scs-msg" class="hide">Login Successfull</div>
+    <script>
+        let errorsElement = document.getElementById('errors');
+        let registerForm = document.getElementById('register');
+        document.getElementById('goto-signup').addEventListener('click', event => {
+            document.getElementById('register').classList.remove('hide')
+            document.getElementById('login').classList.add('hide')
+        })
+        document.getElementById('goto-login').addEventListener('click', event => {
+            document.getElementById('register').classList.add('hide')
+            document.getElementById('login').classList.remove('hide')
+        })
+        let token = localStorage.getItem('token')                
+        if(token){
+            homepageHandler();
+        }        
+        registerForm.addEventListener('submit',async event => {
+            event.preventDefault()
+            let name = document.getElementById('register-name').value
+            let email = document.getElementById('register-email').value
+            let password = document.getElementById('register-password').value
+            let confirmPassword = document.getElementById('register-confirm-password').value
+            let body = JSON.stringify({
+                name, email, password, confirm_password: confirmPassword                
+            })
+            response = await fetch('http://localhost:8000/part1/register', {
+                method: 'POST',
+                mode: 'cors',
+                headers: {                    
+                    'Content-Type': 'application/json',
+                },
+                body: body                
+            })  
+            let data = await response.json();                      
+            if(response.ok){                                
+                document.getElementById('register').classList.add('hide');
+                document.getElementById('login').classList.remove('hide');
+                errorsElement.textContent = '';
+                document.getElementById('register-name').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('register-confirm-password').value = '';
+            }else{                
+                
+                if(data.errors){
+                    let errors = [];
+                    for(let er of Object.keys(data.errors)){
+                        errors.push(data.errors[er][0])
+                    }                
+                    errorsElement.textContent = '';                
+                    for(let error of errors){
+                        element = document.createElement('p')
+                        element.textContent = error
+                        errorsElement.appendChild(element)
+                    }   
+                }else{
+                    element = document.createElement('p')
+                    element.textContent = data.reason ? data.reason : 'internal server error';
+                    errorsElement.appendChild(element)
+                }
+                
+            }
+        })
+        document.getElementById('login').addEventListener('submit', async event => {
+            event.preventDefault();            
+            let name = document.getElementById('login-name').value;   
+            let password = document.getElementById('login-password').value;
+            let body = JSON.stringify({
+                name, password
+            })
+            response = await fetch('http://localhost:8000/part1/login', {
+                method: 'POST',
+                mode: 'cors',
+                headers: {                    
+                    'Content-Type': 'application/json',
+                },
+                body: body                
+            })  
+            let data = await response.json(); 
+            if(response.ok){
+                errorsElement.textContent = '';
+                localStorage.setItem('token', data.token);
+                document.getElementById('scs-msg').classList.remove('hide')
+                setTimeout(homepageHandler, 1000);
+                document.getElementById('login-name').value = '';   
+                document.getElementById('login-password').value = '';
+                document.getElementById('products-heading').textContent = `products of ${name}`;                
+            }else{
+                if(data.errors){
+                    let errors = [];
+                    for(let er of Object.keys(data.errors)){
+                        errors.push(data.errors[er][0])
+                    }                    
+                    errorsElement.textContent = '';                
+                    for(let error of errors){
+                        errorsElement.textContent = '';
+                        element = document.createElement('p');
+                        element.textContent = error;
+                        errorsElement.appendChild(element);
+                    }
+                }else{
+                    errorsElement.textContent = '';
+                    element = document.createElement('p');
+                    element.textContent = data.reason ? data.reason : 'internal server error';
+                    errorsElement.appendChild(element);
+                }
+                
+            }
+        })
+        async function homepageHandler(){
+            document.getElementById('scs-msg').classList.add('hide')
+            document.getElementById('homepage').classList.remove('hide');
+            document.getElementById('register').classList.add('hide');
+            document.getElementById('login').classList.add('hide');            
+            updateProducts()
+            errorsElement.textContent = '';
+
+        }
+        document.getElementById('logout').addEventListener('click', async event => {
+            response = await fetch('http://localhost:8000/part1/logout', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            })
+            data = await response.json()
+            localStorage.removeItem('token');
+            document.getElementById('homepage').classList.add('hide');
+            document.getElementById('login').classList.remove('hide');
+        })
+        async function updateProducts(){            
+            token = localStorage.getItem('token');
+            response = await fetch('http://localhost:8000/part2/get-all', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                }
+            })
+            let data = await response.json();
+            if(response.ok){
+                createProductTag(data);
+            }else{
+                console.log('error', data);
+            }
+        }
+        let createProductTag = (data) => {
+            let productsContainer = document.getElementById('products-container');
+            productsContainer.textContent = '';
+            for(let obj of data.products){
+                let productDiv = document.createElement('div');                
+                let productNamePara = document.createElement('p');
+                productNamePara.textContent = `Name: ${obj.product_name}`;
+                let productQuantityPara = document.createElement('p');
+                productQuantityPara.textContent = `Quantity: ${obj.quantity}`;
+                let productPricePara = document.createElement('p');
+                productPricePara.textContent = `Price: ${obj.price}`;
+                productDiv.appendChild(productNamePara);
+                productDiv.appendChild(productQuantityPara);
+                productDiv.appendChild(productPricePara);
+                let deleteBtn = document.createElement('button')
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = async () => {
+                    response = await fetch(`http://localhost:8000/part2/delete/${obj.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        }
+                    });      
+                    updateProducts()              
+                }
+                productDiv.appendChild(deleteBtn)
+                productsContainer.appendChild(productDiv);
+            }
+        }
+        document.getElementById('add-product').addEventListener('submit', async event => {
+            event.preventDefault();
+            let name = document.getElementById('name').value;
+            let quantity = document.getElementById('quantity').value;
+            let price = document.getElementById('price').value;
+            let body = JSON.stringify({
+                product_name: name,
+                quantity: quantity,
+                price: price
+            })
+            response = await fetch(`http://localhost:8000/part2/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: body
+            });      
+            data = await response.json();
+            let productErrorElement = document.getElementById('product-error')
+            if(response.ok){                
+                productErrorElement.textContent = '';
+                document.getElementById('name').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('price').value = '';
+                updateProducts()
+            }else{
+                let errors = [];
+                for(let er of Object.keys(data.errors)){
+                    errors.push(data.errors[er][0]);                    
+                }                
+                productErrorElement.textContent = '';                
+                
+                for(let error of errors){                    
+                    element = document.createElement('p');
+                    element.textContent = error;
+                    productErrorElement.appendChild(element);
+                }
+            }
+        })
+    </script>
+</body>
+</html>
